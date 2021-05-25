@@ -106,7 +106,7 @@ export function colorify(input: string): ColorInstruction[] {
 	let instructions: ColorInstruction[] = [];
 	let stack: string = '';
 	let currentInstruction: ColorInstruction = {
-		css: '',
+		css: 'color: initial;',
 		value: '',
 		parsed: ['', '']
 	};
@@ -118,8 +118,8 @@ export function colorify(input: string): ColorInstruction[] {
 				currentInstruction.value
 			];
 			instructions.push(currentInstruction as ColorInstruction);
-			rsi();
 		}
+		rsi();
 	}
 
 	function pushBuf() {
@@ -133,9 +133,9 @@ export function colorify(input: string): ColorInstruction[] {
 				currentInstruction.css += currentInstruction.css.replace(/\b(\w+)\s+\1\b/g, '');
 			}
 			instructions.push(currentInstruction as ColorInstruction);
-			rsi();
 			currentInstruction.css = stack;
 		}
+		rsi();
 	}
 
 	function rsi() {
@@ -152,6 +152,7 @@ export function colorify(input: string): ColorInstruction[] {
 		// applies color if exists
 		if ((v === "&" || v === "§") && (/[a-z]|[0-9]/).test(tokens[curr + 1])) {
 			const currentColor = getColorDescription(tokens[++curr]);
+			pushBuf();
 			if (currentColor) {
 				if (currentColor.code === 'r') {
 					pushBufAndReset();
@@ -182,11 +183,10 @@ export function colorify(input: string): ColorInstruction[] {
 	return instructions;
 }
 
-export function colorLog(msg: string): void {
+export function colorLog(msg: string, ...consoleArgs: string[]): void {
 	// get the colors from the buffer;
 	let colors = colorify(msg);
 	let final: string = "";
-	let consoleArgs: string[] = [];
 
 	for (let color of colors) {
 		final += '%c' + color.value;
